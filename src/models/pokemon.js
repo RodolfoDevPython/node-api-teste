@@ -1,4 +1,7 @@
 const mongoose = require("../database");
+const fs = require("fs");
+const path = require("path");
+const { promisify } = require("util");
 
 const PokemonSchema = new mongoose.Schema({
     name: {
@@ -118,6 +121,10 @@ const PokemonSchema = new mongoose.Schema({
         default: Date.now
     }
 
+});
+
+PokemonSchema.pre("remove", function() {
+    return promisify(fs.unlink)(this.imgName);
 });
 
 const Pokemon = mongoose.model("Pokemon", PokemonSchema );

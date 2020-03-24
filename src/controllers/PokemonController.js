@@ -3,8 +3,9 @@ const Pokemon = require("../models/pokemon");
 module.exports = {
 
     async inserir(req, res) {
-
+        console.log(req.file)
         const { name } = req.body;
+
         try {
 
             if (await Pokemon.findOne({ name })) return res.status(400).json({ error: "Pokemon already existy" });
@@ -14,7 +15,9 @@ module.exports = {
             return res.json({ pokemon });
 
         } catch (error) {
+
             return res.json({ message: "Problema ao inserir" });
+
         }
 
     },
@@ -29,74 +32,13 @@ module.exports = {
 
         const { id } = req.params;
 
-        const { name ,
-            PokedexNumber,
-            imgName ,
-            generation ,
-            evolutionStage ,
-            evolved ,
-            familyID ,
-            crossGen ,
-            type1 ,
-            type2 ,
-            weather1 ,
-            weather2 ,
-            statTotal ,
-            atk ,
-            def ,
-            sta ,
-            legendary ,
-            aquireable ,
-            spawns ,
-            regional,
-            raidable ,
-            hatchable ,
-            shiny,
-            nest,
-            New ,
-            notGettable,
-            futureEvolve,
-            cp40,
-            cp39 } = req.body
-
-        const pokemon = await Pokemon.findByIdAndUpdate(id, { 
-            name ,
-            PokedexNumber,
-            imgName ,
-            generation ,
-            evolutionStage ,
-            evolved ,
-            familyID ,
-            crossGen ,
-            type1 ,
-            type2 ,
-            weather1 ,
-            weather2 ,
-            statTotal ,
-            atk ,
-            def ,
-            sta ,
-            legendary ,
-            aquireable ,
-            spawns ,
-            regional,
-            raidable ,
-            hatchable ,
-            shiny,
-            nest,
-            "new": New ,
-            notGettable,
-            futureEvolve,
-            cp40,
-            cp39
-        });
+        const pokemon = await Pokemon.findByIdAndUpdate(id,  req.body );
 
         if (!pokemon) return res.status(400).json({ error: "Error in updated" });
 
         return res.json({ message: "updated Sucess" });
 
     },
-
     async delete(req, res) {
 
         const { id } = req.params;
@@ -111,5 +53,21 @@ module.exports = {
             
             return res.status(400).json({ error: "Can't deleted" });
         }
+    },
+
+    async updateImg(req, res) {
+
+        const { id } = req.params;
+        const { filename: imgName } = req.file;
+
+        console.log(imgName);
+        const pathImg = `${process.env.APP_URL}/files/${imgName}`
+
+        const pokemon = await Pokemon.findByIdAndUpdate(id, { imgName : pathImg });
+
+        if (!pokemon) return res.status(400).json({ error: "Error in updated" });
+
+        return res.json({ message: "updated Sucess" });
+
     }
 }

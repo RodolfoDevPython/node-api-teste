@@ -3,20 +3,21 @@ const Pokemon = require("../models/pokemon");
 module.exports = {
 
     async inserir(req, res) {
-        console.log(req.file)
-        const { name } = req.body;
+        const { name } = req.body.info;
+
+        const dados = req.body.info;
 
         try {
 
-            if (await Pokemon.findOne({ name })) return res.status(400).json({ error: "Pokemon already existy" });
+            if (await Pokemon.findOne({ name })) return res.status(200).json({ message: "Pokemon already existy" });
+            
+            const pokemon = await Pokemon.create(dados);
 
-            const pokemon = await Pokemon.create(req.body);
-
-            return res.json({ pokemon });
+            return res.status(201).json({ message: `Pokemon ${name} created success` , pokemon});
 
         } catch (error) {
 
-            return res.json({ message: "Problema ao inserir" });
+            return res.status(400).json({ message: "Problema ao inserir" });
 
         }
 
@@ -24,7 +25,43 @@ module.exports = {
 
     async listagem(req, res) {
 
-        const pokemon = await Pokemon.find();
+        const { page = 1 } = req.query; 
+
+        const option = {
+            page,
+            limit: 5,
+        }
+
+        const pokemon = await Pokemon.paginate({}, option);
+
+        res.json(pokemon);
+    },
+    async listagem_name(req, res) {
+
+        const { name } = req.params;
+        
+        try {
+            Pokemon.find({ name: {
+                $regex: new RegExp(name, "ig")
+                    }
+            },function(err, doc) {
+                if (err) {
+                    
+                    return res.json("Not found pokemon");        
+                }
+                
+                return res.json(doc);
+            });
+        } catch (error) {
+            return res.json("Error");    
+        }
+
+    },
+    async listagem_id(req, res) {
+
+        const { id } = req.params;
+    
+        const pokemon = await Pokemon.findById(id);
 
         res.json(pokemon);
     }, 
@@ -32,7 +69,9 @@ module.exports = {
 
         const { id } = req.params;
 
-        const pokemon = await Pokemon.findByIdAndUpdate(id,  req.body );
+        const dados = req.body.info;
+
+        const pokemon = await Pokemon.findByIdAndUpdate(id, dados);
 
         if (!pokemon) return res.status(400).json({ error: "Error in updated" });
 
@@ -60,7 +99,6 @@ module.exports = {
         const { id } = req.params;
         const { filename: imgName } = req.file;
 
-        console.log(imgName);
         const pathImg = `${process.env.APP_URL}/files/${imgName}`
 
         const pokemon = await Pokemon.findByIdAndUpdate(id, { imgName : pathImg });

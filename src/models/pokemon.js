@@ -2,6 +2,7 @@ const mongoose = require("../database");
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 const PokemonSchema = new mongoose.Schema({
     name: {
@@ -60,7 +61,7 @@ const PokemonSchema = new mongoose.Schema({
         type: String,
         require: true,        
     },
-    stat: {
+    sta: {
         type: String,
         require: true,        
     },
@@ -122,6 +123,8 @@ const PokemonSchema = new mongoose.Schema({
     }
 
 });
+
+PokemonSchema.plugin(mongoosePaginate);
 
 PokemonSchema.pre("remove", function() {
     return promisify(fs.unlink)(this.imgName);

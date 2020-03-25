@@ -99,7 +99,7 @@ module.exports = {
         const { id } = req.params;
         const { filename: imgName } = req.file;
 
-        const pathImg = `${process.env.APP_URL}/files/${imgName}`
+        const pathImg = `${process.env.APP_URL}files/${imgName}`
 
         const pokemon = await Pokemon.findByIdAndUpdate(id, { imgName : pathImg });
 
